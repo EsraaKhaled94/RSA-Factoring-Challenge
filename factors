@@ -1,25 +1,49 @@
-#!/usr/bin/python3
-import sys
-from check import cleanning, result, compute_non_prime_numbers
+#!/usr/bin/env bash
+# is a factors challenge
 
-""" Function for deleviering result meant for the factor"""
+check_factor()
+{
+	if [ $# -ne 3 ];
+        then
+                args=("$@")
+                count=0
+                num2=1
+                for a in ${args[*]};
+                do
+                        if [ $count -gt 1 ];
+                        then
+                                num2=$(echo $a*$num2 | bc)
+                        fi
+                        count=$((count + 1))
+                done
+        else
+                num2=$3
+        fi
 
+        num1=$2
+        num=$(echo "$1" | tr ':' '=')
 
-def factor():
-	d = sys.argv
+        result=$(echo "if($num2 > $num1) 1 else 0" | bc)
+	        if ((result == 1)); then
+		        numcp=$num1
+		        num1=$num2
+		        num2=$numcp
+                fi
 
-	if 1 < len(sys.argv) < 3:
-		f = open(d[-1], 'r')
-		e = f.readline()
-		q = cleanning('\n', list(e))
-		while len(e) > 1:
-			w, u = compute_non_prime_numbers(q)
-			result(w, u, q)
-			e = f.readline()
-			if len(e) > 0:
-				q = cleanning('\n', list(e))
-		f.close()
+        echo "$num$num1*$num2"
+}
 
+if [ $# -ne 1 ]
+then
+        echo 'Usage: factors <file>'
+        exit 1
+else
 
-if __name__ == '__main__':
-	factor()
+        while read i
+        do
+
+                result=$(factor "$i")
+                check_factor $result
+
+        done < "$1"
+fi
